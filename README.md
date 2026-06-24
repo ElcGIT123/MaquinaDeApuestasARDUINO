@@ -1,7 +1,7 @@
 # 🎰 Máquina de Apuestas (Arduino)
 
 Una máquina de apuestas interactiva desarrollada en la plataforma Arduino, diseñada bajo una arquitectura similar a la de una videoconsola clásica. 
-Este software implementa patrones de diseño de videojuegos, siendo reutilizable para una videoconsola o por el estilo.
+Este software implementa patrones de diseño de videojuegos, siendo reutilizable para una videoconsola o similares.
 
 ---
 
@@ -19,11 +19,10 @@ Este software implementa patrones de diseño de videojuegos, siendo reutilizable
 * **x2 CI SN74HC595N**
 * **x1 Potenciometro (10Kohms)**
 * **x1 Buzzer pasivo**
-* **x8 leds (3 rojos, 2 verdes y 3 amarillos) **
+* **x8 leds (3 rojos, 2 verdes y 3 amarillos)**
+* **Cables dupont: 5 hembra-macho / 12 macho-macho**
+* **Cables puente de alambre**
 
-* **Componentes extra:** 
-* **cables dupont: 5 hembra-macho / 12 macho-macho**
-* ** cables puente de alambre**
 ## 🚀 Instalación y Uso
 
 ** Proximamente se anexara una guia visual de las conexiones, cuando el proyecto este completamente terminado**
