@@ -1,0 +1,8 @@
+
+/build/
+/bin/
+/out/
+
+.atmelstart/
+firmware.elf
+firmware.hex
