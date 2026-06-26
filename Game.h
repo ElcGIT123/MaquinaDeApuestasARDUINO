@@ -15,7 +15,7 @@ enum Minigames;
 extern MachineStates currentState;
 extern Minigames currentGame;
 
-extern uint8_t currentMenuScreen;
+extern int8_t currentMenuScreen;
 
 String centerText(String text);
 

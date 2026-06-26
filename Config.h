@@ -45,7 +45,7 @@ struct Joystick {
 
 extern MachineStates currentState;
 extern Minigames currentGame;
-extern uint8_t currentMenuScreen;
+extern int8_t currentMenuScreen;
 
 extern int globalMoney;
 extern int betMoney;

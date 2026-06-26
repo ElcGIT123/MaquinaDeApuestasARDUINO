@@ -19,6 +19,10 @@ const byte* const bsResourcePack[] PROGMEM = {
 
 class BetState : public Game {
 
+  private:
+    unsigned long timeBS;
+    unsigned long timeButton;
+
   public:
     bool isDeclared;
     uint8_t increment;
@@ -29,7 +33,9 @@ class BetState : public Game {
       betMoney
     ),
     isDeclared(false),
-    increment(betIncrement)
+    increment(betIncrement),
+    timeBS(0),
+    timeButton(0)
   {}
 
   void initScreen(LiquidCrystal &display) override {
@@ -37,6 +43,9 @@ class BetState : public Game {
   }
 
   void init(LiquidCrystal &display) override {
+    timeBS = 0;
+    timeButton = 0;
+
     uploadGameResourcePack(display);
     display.clear();
     display.setCursor(0, 5);
@@ -54,14 +63,20 @@ class BetState : public Game {
   }
 
   void update(LiquidCrystal &display, Joystick &joystick) override {
+    unsigned long currentTime = millis();
+
     if (joystick.pressed()) {
       this->isDeclared = true;
-      initGame();
-      delay(300);
-      return;
+      if(currentTime - timeButton >= 300) {
+        timeButton = currentTime;
+        initGame();
+        return;
+      }
     }
-    Serial.print("BSTATE");
-    delay(1000);
+    if(currentTime - timeBS >= 1000) {
+      timeBS = currentTime;
+      Serial.print("BSTATE");
+    }
   }
 
 };

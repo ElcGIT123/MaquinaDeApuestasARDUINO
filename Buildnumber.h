@@ -19,6 +19,8 @@ class Buildnumber : public Game {
   private:
     int playPrice;
     bool isPlay;
+    unsigned long timeBN;
+    unsigned long timeButton;
 
   public:
     Buildnumber() : Game(
@@ -28,7 +30,9 @@ class Buildnumber : public Game {
       betMoney
     ),
     playPrice(1000),
-    isPlay(true)
+    isPlay(true),
+    timeBN(0),
+    timeButton(0)
   {}
 
   void initScreen(LiquidCrystal &display) override {
@@ -40,6 +44,9 @@ class Buildnumber : public Game {
   }
 
   void init(LiquidCrystal &display) override {
+    timeBN = millis();
+    timeButton = millis();
+
     uploadGameResourcePack(display);
     display.clear();
 
@@ -48,13 +55,20 @@ class Buildnumber : public Game {
   }
 
   void update(LiquidCrystal &display, Joystick &joystick) override {
-    Serial.print("BM");
-    delay(1000);
+    unsigned long currentTime = millis();
+    
+    if(currentTime - timeBN >= 1000){
+      timeBN = currentTime;
+      Serial.print("BM");
+    }
+    
     if (joystick.pressed()) {
-      Serial.print(" \n BUILDNUMBER PASS");
-      delay(1000);
-      currentState = MENU;
-      currentGame = NOT_IN_GAME;
+      if(currentTime - timeButton >= 300) {
+        timeButton = currentTime;
+        Serial.print(" \n BUILDNUMBER PASS");
+        currentState = MENU;
+        currentGame = NOT_IN_GAME;
+      }
     }
   }
 

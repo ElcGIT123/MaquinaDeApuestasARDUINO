@@ -11,4 +11,14 @@ const byte* menuSrcPack[] = {
   ARROW_LEFT
 };
 
+const byte* configSrcPack[] = {
+  FRAME_RIGHT,
+  FRAME_LEFT,
+};
+
+const byte* tutorialSrcPack[] = {
+  FRAME_RIGHT,
+  FRAME_LEFT,
+};
+
 #endif

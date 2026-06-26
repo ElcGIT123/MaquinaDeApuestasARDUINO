@@ -26,6 +26,8 @@ class Tragamonedas : public Game {
   private:
     int playPrice;
     bool isPlay;
+    unsigned long timeTM;
+    unsigned long timeButton;
 
   public:
     Tragamonedas()
@@ -36,7 +38,9 @@ class Tragamonedas : public Game {
       betMoney
     ),
     playPrice(1000),
-    isPlay(true)
+    isPlay(true),
+    timeTM(0),
+    timeButton(1000)
   {}
 
   void initScreen(LiquidCrystal &display) override {
@@ -60,6 +64,8 @@ class Tragamonedas : public Game {
   }
 
   void init(LiquidCrystal &display) override {
+    timeTM = millis();
+    timeButton = millis();
 
     if(!bet.isDeclared) { 
       bet.init(display);
@@ -84,19 +90,25 @@ class Tragamonedas : public Game {
   }
 
   void update(LiquidCrystal &display, Joystick &joystick) override {
+    unsigned long currentTime = millis();
+
     if(!bet.isDeclared) { 
       bet.update(display, joystick); 
       return; 
     }
 
-    Serial.print("TM");
-    delay(1000);
+    if(currentTime - timeTM >= 1000){
+      timeTM = currentTime;
+      Serial.print("TM");
+    }
+
     if (joystick.pressed()) {
-      Serial.print(" \n TEST PASSED");
-      delay(1000);
-      bet.isDeclared = false;
-      currentState = MENU;
-      currentGame = NOT_IN_GAME;
+      if(currentTime - timeButton >= 300){
+        Serial.print(" \n TEST PASSED");
+        bet.isDeclared = false;
+        currentState = MENU;
+        currentGame = NOT_IN_GAME;
+      }
     }
   }
 

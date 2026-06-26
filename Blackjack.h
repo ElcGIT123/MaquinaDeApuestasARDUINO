@@ -19,6 +19,8 @@ class Blackjack : public Game {
   private:
     int playPrice;
     bool isPlay;
+    unsigned long timeBJ;
+    unsigned long timeButton;
 
   public:
     Blackjack() : Game(
@@ -28,7 +30,9 @@ class Blackjack : public Game {
       betMoney
     ),
     playPrice(1000),
-    isPlay(true)
+    isPlay(true),
+    timeBJ(0),
+    timeButton(0)
   {}
 
   void initScreen(LiquidCrystal &display) override {
@@ -39,6 +43,9 @@ class Blackjack : public Game {
   }
 
   void init(LiquidCrystal &display) override {
+    timeBJ = millis();
+    timeButton = millis();
+
     uploadGameResourcePack(display);
     display.clear();
 
@@ -47,13 +54,20 @@ class Blackjack : public Game {
   }
 
   void update(LiquidCrystal &display, Joystick &joystick) override {
-    Serial.print("BJ");
-    delay(1000);
+    unsigned long currentTime = millis();
+
+    if(currentTime - timeBJ >= 1000) {
+      timeBJ = currentTime;
+      Serial.print("BJ");
+    }
+
     if (joystick.pressed()) {
-      Serial.print(" \n BLACKJACK PASSED");
-      delay(1000);
-      currentState = MENU;
-      currentGame = NOT_IN_GAME;
+      if(currentTime - timeButton >= 300) {
+        timeButton = currentTime;
+        Serial.print(" \n BLACKJACK PASSED");
+        currentState = MENU;
+        currentGame = NOT_IN_GAME;
+      }
     }
   }
 

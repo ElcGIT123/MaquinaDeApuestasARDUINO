@@ -40,7 +40,10 @@ Game* games[] = {
 const size_t GAMES = sizeof(games) / sizeof(games[0]); ///< Cardinalidad de games[]
 uint8_t currentSelectGame;    ///< Juego actual seleccionado
 
-uint8_t currentMenuScreen;    ///< Pantalla actual en el menu
+int8_t currentMenuScreen;    ///< Pantalla actual en el menu
+
+unsigned long lastScroll = 0;
+const int scrollSpeed = 300;
 
 int globalMoney; 
 
@@ -242,28 +245,33 @@ void initMenuScreen() {
 * @brief Actualiza la logica del menu
 */
 void updateMenu() {
+  unsigned long currentTime = millis();
+
+  //delay
+  if(currentTime - lastScroll < scrollSpeed) return;
+
   // y
   if (joystick.up()) {
+    lastScroll = currentTime;
     currentState = TUTORIAL;
     Serial.println("Canal tutorial");
-    delay(500);
     return;
   }
   if (joystick.down()) {
+    lastScroll = currentTime;
     currentState = CONFIG;
     Serial.print("Canal CONFIG");
-    delay(500);
     return;
   }
   // X
   if (joystick.right()) {
+    lastScroll = currentTime;
     Serial.println("RECORRIENDO DERECHA TEST");
     currentMenuScreen++;
     if (currentMenuScreen > GAMES) {
       currentMenuScreen = -1;
     }
-    delay(400);
-    if(currentMenuScreen == -1) {
+    if(currentMenuScreen < -1) {
       initMenuScreen();
       return;
     }
@@ -271,12 +279,12 @@ void updateMenu() {
     return;
   }
   if (joystick.left()) {
+    lastScroll = currentTime;
     Serial.println("RECORRIENDO IZQUIERDA TEST");
     currentMenuScreen--;
     if (currentMenuScreen < -1) {
       currentMenuScreen = GAMES - 1;
     }
-    delay(400);
     if(currentMenuScreen == -1) {
       initMenuScreen();
       return;
@@ -286,16 +294,15 @@ void updateMenu() {
   }
   // button
   if (joystick.pressed()) {
+    lastScroll = currentTime;
     if (currentMenuScreen == -1) {
       Serial.print("MENU");
-      delay(500);
       return;
     }
     Serial.println("OTRO");
     currentState = IN_GAME;
     currentSelectGame = currentMenuScreen;
     currentMenuScreen = -1;
-    delay(500);
   }
 
 }
@@ -313,21 +320,25 @@ void initConfigScreen() {
 * @brief Actualiza la logica de Config
 */
 void updateConfig() {
+  unsigned long currentTime = millis();
+  // delay
+  if(currentTime - lastScroll < scrollSpeed) return;
+
   if (joystick.up()) {
+    lastScroll = currentTime;
     currentState = MENU;
     Serial.println("channel: MENU");
-    delay(300);
     return;
   }
   if (joystick.down()) {
+    lastScroll = currentTime;
     currentState = TUTORIAL;
     Serial.println("channel: TUTORIAL");
-    delay(300);
     return;
   }
   if (joystick.pressed()) {
+    lastScroll = currentTime;
     Serial.println("IN CONFIG");
-    delay(300);
   }
 }
 
@@ -346,21 +357,26 @@ void initTutorialScreen() {
 * @brief Actualiza la logica de Tutorial
 */
 void updateTutorial() {
+  unsigned long currentTime = millis();
+
+  // delay
+  if(currentTime - lastScroll < scrollSpeed) return;
+
   if (joystick.up()) {
+    lastScroll = currentTime;
     currentState = CONFIG;
     Serial.println("channel: CONFIG");
-    delay(500);
     return;
   }
   if (joystick.down()) {
+    lastScroll = currentTime;
     currentState = MENU;
     Serial.println("channel: MENU");
-    delay(500);
     return;
   }
   if (joystick.pressed()) {
+    lastScroll = currentTime;
     Serial.println("TEST TUTORIAL");
-    delay(300);
   }
 }
 
