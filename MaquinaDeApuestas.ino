@@ -1,3 +1,11 @@
+/**
+* @file MaquinaDeApuestas.ino
+* @author ELC/ELchinomandaron
+* @brief Sistema de maquina de apuestas basada en FSM(Finite State Machine) y un Game loop
+* @version 0.2.0-poc 
+* @date 2026-06-25
+**/
+
 #include <LiquidCrystal.h>
 
 #include "Config.h"
@@ -11,13 +19,14 @@
 #include "Blackjack.h"
 #include "Buildnumber.h"
 
-MachineStates currentState = MENU;
-MachineStates lastState = LOST;
-Minigames currentGame = NOT_IN_GAME;
-Minigames lastGame = NOT_IN_GAME;
+MachineStates currentState; ///< Estado actual de la FSM
+MachineStates lastState;    ///< Ultimo estado de la FSM
 
-Joystick joystick;
+Minigames currentGame;      ///< Juego actual
 
+Joystick joystick;          ///< Struct que maneja el Joystick analogico HW-504
+
+/// instancias de los juegos disponibles 
 Tragamonedas tragamonedas;
 Blackjack blackJack;
 Buildnumber buildNumber;
@@ -28,26 +37,30 @@ Game* games[] = {
   &buildNumber
 };
 
-const size_t GAMES = sizeof(games) / sizeof(games[0]);
-uint8_t currentSelectGame = 0;
+const size_t GAMES = sizeof(games) / sizeof(games[0]); ///< Cardinalidad de games[]
+uint8_t currentSelectGame;    ///< Juego actual seleccionado
 
-uint8_t currentMenuScreen = -1;
+uint8_t currentMenuScreen;    ///< Pantalla actual en el menu
 
-int globalMoney = 1000;
-int betMoney = 100;
-int betIncrement = 100;
-int betMin = 0;
-int betMax = 10000;
-BetState bet;
+int globalMoney; 
+
+int betMoney;     ///< Dinero de apuesta
+int betIncrement; ///< Incremento de la apuesta
+int betMin;       ///< Minima apuesta
+int betMax;       ///< Maxima apuesta
+
+BetState bet;     ///< Clase que controla el estado de mannipular la apuesta
 
 // RS, E, D4, D5, D6, D7
 LiquidCrystal display(12, 11, 5, 4, 3, 2);
 
-byte dataCI1 = 0;
-byte dataCI2 = 0;
+byte dataCI1 = 0; ///< Bits en el primer CI SN74HC595
+byte dataCI2 = 0; ///< Bits en el segundo CI SN74HC595
 
-// const byte number[9] = { one, two, three, four, five, six, seven, eight, nine };
-
+/**
+* @brief Configuracion inicial del Hardware y del monitor Serial
+* ademas inicializa los valores de la maquina
+*/
 void setup() {
   Serial.begin(9600);
   display.begin(16, 2);
@@ -59,8 +72,27 @@ void setup() {
   display.clear();
 
   pinMode(13, INPUT_PULLUP);
+
+  currentState = MENU;
+  lastState = LOST;
+
+  currentGame = NOT_IN_GAME;
+  currentSelectGame = 0;
+
+  currentMenuScreen = -1;
+
+  globalMoney = 1000; 
+
+  betMoney = 100;
+  betIncrement = 100;
+  betMin = 0; 
+  betMax = 10000; 
 }
 
+/**
+* @brief Gestiona el ciclo de vida de la maquina. Se encarga de actualizar el valor del input del joystick y 
+* el update() e init() de los estados de la FSM 
+*/
 void loop() {
   joystick.update();
 
@@ -78,12 +110,6 @@ void loop() {
       case IN_GAME:
         initGame();
         break;
-      /* case LOST:
-        initLost();
-        break;
-      case WIN:
-        initWin();
-        break; */
     }
     lastState = currentState;
   }
@@ -101,23 +127,30 @@ void loop() {
     case IN_GAME:
       updateGame();
       break;
-    /* case LOST:
-      updateLost();
-      break;
-    case WIN:
-      updateWin();
-      break; */
   }
 }
 
+/**
+* @brief Inicializa el juego corresponidente segun el valor en currentSelectGame
+*/
 void initGame() {
   games[currentSelectGame]->init(display);
 }
 
+/**
+* @brief Actualiza el juego correspondiente segun el valor en currentSelectGame
+*/
 void updateGame() {
   games[currentSelectGame]->update(display, joystick);
 }
 
+/**
+* @brief Actualiza el registro de 8 bits del CI 74HC595
+*
+* @param data Es el nuevo valor de 8 bits que tomara el CI 74HC595
+* @param ciID Es el CI que se actualizara con el valor de data, 1 hace referencia al primero y 2 hace referencia
+* el CI que recibe el pin Q7´ 
+**/
 void updateCI(byte data, uint8_t ciID) {
   if (ciID == 1) {
     dataCI1 = data;
@@ -136,6 +169,12 @@ void updateCI(byte data, uint8_t ciID) {
   digitalWrite(LATCH, HIGH);
 }
 
+/**
+* @brief Borra el registro de 8 bits del CI 74HC595
+*
+* @param ciID es el CI que se borara su registro, 1 hace referencia al primero y 2 hace referencia
+* el CI que recibe el pin Q7´ y 3 hace referencia a los dos
+**/
 void resetCI(uint8_t ciID) {
   if (ciID == 1) {
     dataCI1 = 0b00000000;
@@ -156,13 +195,22 @@ void resetCI(uint8_t ciID) {
   digitalWrite(LATCH, HIGH);
 }
 
+/**
+* @brief Crea caracteres personalizados para el LCD 
+*
+* @param icons es un array que contiene a la vez los arrays de los iconos personalizados que se agregaran a la pantalla LCD
+* @param amount se pide la cardinalidad del bucle for para saber cuando parar de usar LiquidCrystal.createChar
+*
+*/
 void uploadResourcePack(byte* icons[], uint8_t amount) {
   for(uint8_t i = 0; i < amount; i++) {
     display.createChar(i, (uint8_t*)icons[i]);
   }
 } 
 
-// MENU
+/**
+* @brief Inicializa en el display la pantalla de Menu
+*/
 void initMenuScreen() {
   // draw
   display.clear();
@@ -190,6 +238,9 @@ void initMenuScreen() {
   display.print("menu");
 }
 
+/**
+* @brief Actualiza la logica del menu
+*/
 void updateMenu() {
   // y
   if (joystick.up()) {
@@ -249,12 +300,18 @@ void updateMenu() {
 
 }
 
+/**
+* @brief Inicializa en el display la pantalla de Config
+*/
 void initConfigScreen() {
   display.clear();
   display.setCursor(0, 0);
   display.print("CONFIG");
 }
 
+/**
+* @brief Actualiza la logica de Config
+*/
 void updateConfig() {
   if (joystick.up()) {
     currentState = MENU;
@@ -274,6 +331,9 @@ void updateConfig() {
   }
 }
 
+/**
+* @brief Inicializa en el display la pantalla de Tutorial
+*/
 void initTutorialScreen() {
   display.clear();
   display.setCursor(0, 0);
@@ -282,6 +342,9 @@ void initTutorialScreen() {
   Serial.print("INIT TUTORIAL TEST");
 }
 
+/**
+* @brief Actualiza la logica de Tutorial
+*/
 void updateTutorial() {
   if (joystick.up()) {
     currentState = CONFIG;
@@ -301,6 +364,9 @@ void updateTutorial() {
   }
 }
 
+/**
+* @brief Enrutador que simplifica la actualizacion de los canales
+*/
 void updateChannels() {
   switch (currentState) {
     case MENU:
@@ -315,6 +381,12 @@ void updateChannels() {
   }
 }
 
+/**
+* @brief Centra un texto entre 16 espacios, para centrar textos en la pantalla LCD
+*
+* @param text el texto que se retornara centrado entre 16 espacios
+* @return String, la variable text centrada
+*/
 String centerText(String text) {
   if(text.length() > 16) {
     return "IncompatibleText";
