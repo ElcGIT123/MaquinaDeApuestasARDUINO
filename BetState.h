@@ -46,10 +46,10 @@ class BetState : public Game {
     timeBS = 0;
     timeButton = 0;
 
-    uploadGameResourcePack(display);
     display.clear();
-    display.setCursor(0, 5);
-    display.print("APUESTA");
+    uploadGameResourcePack(display);
+    
+    gameScreenTemplate(display, this->name);
 
     display.setCursor(1, 1);
     display.print(betMin);

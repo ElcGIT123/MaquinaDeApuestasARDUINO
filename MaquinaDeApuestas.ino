@@ -40,7 +40,8 @@ Game* games[] = {
 const size_t GAMES = sizeof(games) / sizeof(games[0]); ///< Cardinalidad de games[]
 uint8_t currentSelectGame;    ///< Juego actual seleccionado
 
-int8_t currentMenuScreen;    ///< Pantalla actual en el menu
+int8_t currentMenuScreen = -1;    ///< Pantalla actual en el menu
+int8_t lastMenuScreen = -2;
 
 unsigned long lastScroll = 0;
 const int scrollSpeed = 300;
@@ -90,6 +91,8 @@ void setup() {
   betIncrement = 100;
   betMin = 0; 
   betMax = 10000; 
+
+  initMenuScreen();
 }
 
 /**
@@ -206,6 +209,7 @@ void resetCI(uint8_t ciID) {
 *
 */
 void uploadResourcePack(byte* icons[], uint8_t amount) {
+  display.clear();
   for(uint8_t i = 0; i < amount; i++) {
     display.createChar(i, (uint8_t*)icons[i]);
   }
@@ -219,7 +223,7 @@ void initMenuScreen() {
   display.clear();
   uploadResourcePack(
     menuSrcPack, 
-    sizeof(menuSrcPack) / sizeof(menuSrcPack[0])
+    MENU_PACKSIZE
   );
 
   display.setCursor(1, 0);
@@ -246,6 +250,7 @@ void initMenuScreen() {
 */
 void updateMenu() {
   unsigned long currentTime = millis();
+  bool isMove = false;
 
   //delay
   if(currentTime - lastScroll < scrollSpeed) return;
@@ -268,29 +273,15 @@ void updateMenu() {
     lastScroll = currentTime;
     Serial.println("RECORRIENDO DERECHA TEST");
     currentMenuScreen++;
-    if (currentMenuScreen > GAMES) {
-      currentMenuScreen = -1;
-    }
-    if(currentMenuScreen < -1) {
-      initMenuScreen();
-      return;
-    }
-    games[currentMenuScreen]->initScreen(display);
-    return;
+    if (currentMenuScreen >= GAMES) currentMenuScreen = -1;
+    isMove = true;
   }
   if (joystick.left()) {
     lastScroll = currentTime;
     Serial.println("RECORRIENDO IZQUIERDA TEST");
     currentMenuScreen--;
-    if (currentMenuScreen < -1) {
-      currentMenuScreen = GAMES - 1;
-    }
-    if(currentMenuScreen == -1) {
-      initMenuScreen();
-      return;
-    }
-    games[currentMenuScreen]->initScreen(display);
-    return;
+    if (currentMenuScreen < -1) currentMenuScreen = GAMES - 1;
+    isMove = true;
   }
   // button
   if (joystick.pressed()) {
@@ -303,6 +294,18 @@ void updateMenu() {
     currentState = IN_GAME;
     currentSelectGame = currentMenuScreen;
     currentMenuScreen = -1;
+  }
+
+  if(isMove && currentMenuScreen != lastMenuScreen) {
+    if(currentMenuScreen == -1) {
+      initMenuScreen();
+      return;
+    } else {
+      if(currentMenuScreen >= 0 && currentMenuScreen < GAMES) {
+        games[currentMenuScreen]->initScreen(display);
+      }
+    }
+  lastMenuScreen = currentMenuScreen;
   }
 
 }

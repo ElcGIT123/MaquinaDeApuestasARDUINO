@@ -34,7 +34,7 @@ class Tragamonedas : public Game {
     : Game(
       "Tragamonedas", 
       (const byte**)tmResourcePack, 
-      sizeof(tmResourcePack) / sizeof(tmResourcePack[0]),
+      7,
       betMoney
     ),
     playPrice(1000),
@@ -44,9 +44,9 @@ class Tragamonedas : public Game {
   {}
 
   void initScreen(LiquidCrystal &display) override {
+    display.clear();
     uploadGameResourcePack(display);
 
-    display.clear();
     gameScreenTemplate(display, this->name);
 
     display.setCursor(2, 1);

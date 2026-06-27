@@ -10,6 +10,7 @@ const byte* menuSrcPack[] = {
   ARROW_RIGHT,
   ARROW_LEFT
 };
+const uint8_t MENU_PACKSIZE = 5;
 
 const byte* configSrcPack[] = {
   FRAME_RIGHT,

@@ -26,7 +26,7 @@ class Blackjack : public Game {
     Blackjack() : Game(
       "BlackJack", 
       (const byte**)bjResourcePack, 
-      sizeof(bjResourcePack) / sizeof(bjResourcePack[0]),
+      2,
       betMoney
     ),
     playPrice(1000),
@@ -36,18 +36,22 @@ class Blackjack : public Game {
   {}
 
   void initScreen(LiquidCrystal &display) override {
-    uploadGameResourcePack(display);
-    display.setCursor(0, 0);
     display.clear();
+    uploadGameResourcePack(display);
+
+    display.setCursor(0, 0);
     gameScreenTemplate(display, this->name);
+    display.setCursor(0, 1);
+    display.write(byte(0));
+    display.write(byte(1));
   }
 
   void init(LiquidCrystal &display) override {
     timeBJ = millis();
     timeButton = millis();
 
-    uploadGameResourcePack(display);
     display.clear();
+    uploadGameResourcePack(display);
 
     display.setCursor(0, 0);
     display.print("Blackjack init 7");

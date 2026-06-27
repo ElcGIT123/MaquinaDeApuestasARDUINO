@@ -26,7 +26,7 @@ class Buildnumber : public Game {
     Buildnumber() : Game(
       "BuildNumber", 
       (const byte**)bnResourcePack, 
-      sizeof(bnResourcePack) / sizeof(bnResourcePack[0]),
+      2,
       betMoney
     ),
     playPrice(1000),
@@ -36,19 +36,22 @@ class Buildnumber : public Game {
   {}
 
   void initScreen(LiquidCrystal &display) override {
+    display.clear();
     uploadGameResourcePack(display);
     
     display.setCursor(0, 0);
-    display.clear();
     gameScreenTemplate(display, this->name);
+    display.setCursor(0, 1);
+    display.write(byte(0));
+    display.write(byte(1));
   }
 
   void init(LiquidCrystal &display) override {
     timeBN = millis();
     timeButton = millis();
 
-    uploadGameResourcePack(display);
     display.clear();
+    uploadGameResourcePack(display);
 
     display.setCursor(0, 0);
     display.print("BUildNumber init");
